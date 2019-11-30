@@ -28,7 +28,6 @@
 //
 //   # Rinse and repeat
 
-
 let target;
 let popmax;
 let mutationRate;
@@ -61,8 +60,6 @@ function setup() {
 }
 
 function draw() {
-  // Generate mating pool
-  population.naturalSelection();
   //Create next generation
   population.generate();
   // Calculate fitness
@@ -85,12 +82,14 @@ function displayInfo() {
 
   bestPhrase.html("Best phrase:<br>" + answer);
 
-  let statstext = "total generations:     " + population.getGenerations() + "<br>";
-  statstext += "average fitness:       " + nf(population.getAverageFitness()) + "<br>";
+  let statstext =
+    "total generations:     " + population.getGenerations() + "<br>";
+  statstext +=
+    "average fitness:       " + nf(population.getAverageFitness()) + "<br>";
   statstext += "total population:      " + popmax + "<br>";
   statstext += "mutation rate:         " + floor(mutationRate * 100) + "%";
 
   stats.html(statstext);
 
-  allPhrases.html("All phrases:<br>" + population.allPhrases())
+  allPhrases.html("All phrases:<br>" + population.allPhrases());
 }

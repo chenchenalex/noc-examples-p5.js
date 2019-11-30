@@ -9,7 +9,6 @@
 
 class Population {
   constructor(p, m, num) {
-
     this.population; // Array to hold the current population
     this.matingPool; // ArrayList which we will use for our "mating pool"
     this.generations = 0; // Number of generations
@@ -35,11 +34,8 @@ class Population {
     }
   }
 
-  // Generate a mating pool
-  naturalSelection() {
-    // Clear the ArrayList
-    this.matingPool = [];
-
+  // Create a new generation
+  generate() {
     let maxFitness = 0;
     for (let i = 0; i < this.population.length; i++) {
       if (this.population[i].fitness > maxFitness) {
@@ -47,34 +43,36 @@ class Population {
       }
     }
 
-    // Based on fitness, each member will get added to the mating pool a certain number of times
-    // a higher fitness = more entries to mating pool = more likely to be picked as a parent
-    // a lower fitness = fewer entries to mating pool = less likely to be picked as a parent
-    for (let i = 0; i < this.population.length; i++) {
-
-      let fitness = map(this.population[i].fitness, 0, maxFitness, 0, 1);
-      let n = floor(fitness * 100); // Arbitrary multiplier, we can also use monte carlo method
-      for (let j = 0; j < n; j++) { // and pick two random numbers
-        this.matingPool.push(this.population[i]);
-      }
-    }
-  }
-
-  // Create a new generation
-  generate() {
+    let newPopulation = [];
     // Refill the population with children from the mating pool
     for (let i = 0; i < this.population.length; i++) {
-      let a = floor(random(this.matingPool.length));
-      let b = floor(random(this.matingPool.length));
-      let partnerA = this.matingPool[a];
-      let partnerB = this.matingPool[b];
+      let partnerA = this.acceptReject(maxFitness);
+      let partnerB = this.acceptReject(maxFitness);
+
       let child = partnerA.crossover(partnerB);
       child.mutate(this.mutationRate);
-      this.population[i] = child;
+      newPopulation[i] = child;
     }
+
+    this.population = newPopulation;
+
     this.generations++;
   }
 
+  acceptReject(maxFitness) {
+    var r = random(0, maxFitness);
+
+    var index = Math.floor(random(this.population.length));
+
+    while (index < this.population.length && r > 0) {
+      r = r - this.population[index].fitness;
+
+      index++;
+    }
+
+    index--;
+    return this.population[index];
+  }
 
   getBest() {
     return this.best;
@@ -111,14 +109,13 @@ class Population {
     for (let i = 0; i < this.population.length; i++) {
       total += this.population[i].fitness;
     }
-    return total / (this.population.length);
+    return total / this.population.length;
   }
 
   allPhrases() {
     let everything = "";
 
     let displayLimit = min(this.population.length, 50);
-
 
     for (let i = 0; i < displayLimit; i++) {
       everything += this.population[i].getPhrase() + "<br>";
